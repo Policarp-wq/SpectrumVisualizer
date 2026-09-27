@@ -1,0 +1,60 @@
+# .NET and Visual Studio build output (based on GitHub's VisualStudio template)
+**/[Bb]in/
+**/[Oo]bj/
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+artifacts/
+.artifacts/
+publish/
+
+# Visual Studio and IDE state
+.vs/
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.userprefs
+_ReSharper*/
+*.DotSettings.user
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Compiled files, symbols, and logs
+*.pdb
+*.ilk
+*.obj
+*.iobj
+*.ipch
+*.log
+*.binlog
+*.tmp
+*.cache
+
+# NuGet artifacts (packages are restored from the project file)
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+# Test and coverage results
+[Tt]est[Rr]esult*/
+*.trx
+coverage*.json
+coverage*.xml
+coverage*.info
+*.coverage
+*.coveragexml
+
+# Local app preferences must never be committed
+settings.json
+settings.json.tmp
