@@ -1,0 +1,97 @@
+<Window x:Class="TrackPeek.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TrackPeek" Width="286" Height="54"
+        WindowStyle="None" AllowsTransparency="True" Background="Transparent"
+        ShowInTaskbar="False" ShowActivated="False" Topmost="True"
+        ResizeMode="NoResize" Loaded="Window_Loaded" Closed="Window_Closed"
+        LocationChanged="Window_LocationChanged" Deactivated="Window_Deactivated">
+  <Window.Resources>
+    <Style x:Key="MiniButton" TargetType="Button">
+      <Setter Property="Foreground" Value="#F1F3F5" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="FontFamily" Value="Segoe UI Symbol" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Width" Value="21" />
+      <Setter Property="Height" Value="25" />
+      <Setter Property="Template">
+        <Setter.Value>
+          <ControlTemplate TargetType="Button">
+            <Border Background="Transparent" CornerRadius="5">
+              <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+          </ControlTemplate>
+        </Setter.Value>
+      </Setter>
+      <Style.Triggers>
+        <Trigger Property="IsMouseOver" Value="True">
+          <Setter Property="Foreground" Value="#A7EACA" />
+        </Trigger>
+      </Style.Triggers>
+    </Style>
+  </Window.Resources>
+  <Border CornerRadius="13" Background="#F220242C" BorderBrush="#55FFFFFF" BorderThickness="1"
+          Margin="2" Padding="6" MouseLeftButtonDown="Card_MouseLeftButtonDown">
+    <Border.ContextMenu>
+      <ContextMenu>
+        <MenuItem Header="Настроить эквалайзер…" Click="Settings_Click" />
+        <MenuItem Header="Выход" Click="Exit_Click" />
+      </ContextMenu>
+    </Border.ContextMenu>
+    <Border.Effect>
+      <DropShadowEffect Color="#000000" BlurRadius="12" ShadowDepth="3" Opacity="0.32" />
+    </Border.Effect>
+    <Grid ClipToBounds="True">
+      <UniformGrid x:Name="SpectrumBackdrop" Rows="1" Columns="20" Margin="36,0,0,0"
+                   Opacity="0.34" IsHitTestVisible="False" />
+      <Grid>
+      <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="36" />
+        <ColumnDefinition Width="*" />
+        <ColumnDefinition Width="66" />
+      </Grid.ColumnDefinitions>
+      <Border Width="34" Height="34" VerticalAlignment="Center" CornerRadius="7" Background="#6355A4" ClipToBounds="True">
+        <Grid>
+          <TextBlock x:Name="ArtworkFallback" Text="♫" Foreground="White" FontSize="20"
+                     HorizontalAlignment="Center" VerticalAlignment="Center" />
+          <Image x:Name="Artwork" Stretch="UniformToFill" />
+        </Grid>
+      </Border>
+      <Grid Grid.Column="1" VerticalAlignment="Center" Margin="7,0,3,0">
+        <Grid.RowDefinitions>
+          <RowDefinition Height="Auto" />
+          <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <TextBlock x:Name="TrackTitle" Text="TrackPeek" Foreground="#F1F3F5"
+                   FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+        <Grid Grid.Row="1" Margin="0,1,0,0">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
+          </Grid.ColumnDefinitions>
+          <TextBlock x:Name="TrackArtist" Text="Ждём музыку…" Foreground="#F1F3F5"
+                     FontSize="9" TextTrimming="CharacterEllipsis" />
+          <TextBlock x:Name="TimeText" Grid.Column="1" Foreground="#F1F3F5" FontSize="9"
+                     Margin="4,0,0,0" HorizontalAlignment="Right" Visibility="Collapsed" />
+        </Grid>
+      </Grid>
+      <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+        <Button x:Name="PreviousButton" Style="{StaticResource MiniButton}" ToolTip="Назад" Click="Previous_Click">
+          <Path Width="14" Height="14" Stretch="Uniform" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                Data="M2,2 L4,2 L4,14 L2,14 Z M13,2 L13,14 L5,8 Z" />
+        </Button>
+        <Button x:Name="PlayButton" Style="{StaticResource MiniButton}" ToolTip="Пауза / играть" Click="Play_Click">
+          <Path x:Name="PlayGlyph" Width="14" Height="14" Stretch="Uniform" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                Data="M3,2 L6,2 L6,14 L3,14 Z M10,2 L13,2 L13,14 L10,14 Z" />
+        </Button>
+        <Button x:Name="NextButton" Style="{StaticResource MiniButton}" ToolTip="Дальше" Click="Next_Click">
+          <Path Width="14" Height="14" Stretch="Uniform" Fill="{Binding Foreground, RelativeSource={RelativeSource AncestorType=Button}}"
+                Data="M12,2 L14,2 L14,14 L12,14 Z M3,2 L11,8 L3,14 Z" />
+        </Button>
+      </StackPanel>
+      </Grid>
+    </Grid>
+  </Border>
+</Window>

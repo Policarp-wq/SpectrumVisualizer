@@ -1,0 +1,47 @@
+<Window x:Class="TrackPeek.SettingsWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="TrackPeek — настройки" Width="330" Height="620"
+        Background="#22262E" Foreground="#F4F5F6"
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize"
+        ShowInTaskbar="False" Topmost="True">
+  <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+  <StackPanel Margin="18">
+    <TextBlock Text="Вид эквалайзера" FontSize="16" FontWeight="SemiBold" Margin="0,0,0,12" />
+    <CheckBox x:Name="RainbowCheck" Content="Радужное переливание"
+              Checked="Rainbow_Changed" Unchecked="Rainbow_Changed" Margin="0,0,0,14" />
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,15">
+      <Button x:Name="ColorButton" Content="Выбрать свой цвет" Click="ChooseColor_Click"
+              Padding="10,6" Background="#343A44" Foreground="White" BorderBrush="#55616F" />
+      <Border x:Name="ColorSwatch" Width="23" Height="23" CornerRadius="5" Margin="11,0,0,0" />
+    </StackPanel>
+    <TextBlock x:Name="OpacityLabel" Text="Заметность: 34%" Margin="0,0,0,5" />
+    <Slider x:Name="OpacitySlider" Minimum="5" Maximum="100" ValueChanged="Opacity_Changed"
+            TickFrequency="5" IsSnapToTickEnabled="False" />
+    <TextBlock x:Name="SensitivityLabel" Text="Чувствительность: 65%" Margin="0,14,0,5" />
+    <Slider x:Name="SensitivitySlider" Minimum="10" Maximum="200" ValueChanged="Sensitivity_Changed"
+            TickFrequency="10" IsSnapToTickEnabled="False" />
+    <CheckBox x:Name="ShowTimeCheck" Content="Показывать время трека"
+              Checked="ShowTime_Changed" Unchecked="ShowTime_Changed" Margin="0,14,0,8" />
+    <TextBlock x:Name="TimeOpacityLabel" Text="Заметность времени: 95%" Margin="0,0,0,5" />
+    <Slider x:Name="TimeOpacitySlider" Minimum="20" Maximum="100" ValueChanged="TimeOpacity_Changed"
+            TickFrequency="5" IsSnapToTickEnabled="False" />
+    <TextBlock x:Name="HeightLabel" Text="Высота плашки: 54 px" Margin="0,14,0,5" />
+    <Slider x:Name="HeightSlider" Minimum="48" Maximum="126" ValueChanged="Height_Changed"
+            TickFrequency="2" IsSnapToTickEnabled="False" />
+    <TextBlock Text="Текст и кнопки" FontSize="15" FontWeight="SemiBold" Margin="0,18,0,9" />
+    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12">
+      <Button Content="Цвет надписей" Click="ChooseTextColor_Click"
+              Padding="10,6" Background="#343A44" Foreground="White" BorderBrush="#55616F" />
+      <Border x:Name="TextColorSwatch" Width="23" Height="23" CornerRadius="5" Margin="11,0,0,0" />
+    </StackPanel>
+    <TextBlock x:Name="TextScaleLabel" Text="Размер текста: 100%" Margin="0,0,0,5" />
+    <Slider x:Name="TextScaleSlider" Minimum="75" Maximum="150" ValueChanged="TextScale_Changed" />
+    <TextBlock x:Name="TextOpacityLabel" Text="Заметность текста и кнопок: 100%" Margin="0,12,0,5" />
+    <Slider x:Name="TextOpacitySlider" Minimum="25" Maximum="100" ValueChanged="TextOpacity_Changed" />
+    <CheckBox x:Name="AutoStartCheck" Content="Запускать вместе с Windows"
+              Checked="AutoStart_Changed" Unchecked="AutoStart_Changed" Margin="0,18,0,5" />
+    <TextBlock Text="Изменения применяются сразу" Foreground="#9DA6B0" FontSize="10" Margin="0,10,0,0" />
+  </StackPanel>
+  </ScrollViewer>
+</Window>
