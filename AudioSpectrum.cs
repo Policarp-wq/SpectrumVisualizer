@@ -7,7 +7,7 @@ namespace TrackPeek;
 internal sealed class AudioSpectrum : IDisposable
 {
     private const int FftLength = 2048;
-    public const int BandCount = 20;
+    public const int BandCount = MusicMetrics.BandCount;
     private static readonly (int Low, int High)[] Bands = Enumerable.Range(0, BandCount)
         .Select(index =>
         {
@@ -21,6 +21,8 @@ internal sealed class AudioSpectrum : IDisposable
     private readonly object _gate = new();
     private readonly double[] _levels = new double[Bands.Length];
     private readonly float[] _sampleWindow = new float[FftLength];
+    private readonly MusicMetrics _musicMetrics = new();
+    private MusicMetricsSnapshot _snapshot = MusicMetricsSnapshot.Silent;
     private int _sampleWriteIndex;
     private int _samplesBuffered;
     private DateTime _lastAudio = DateTime.MinValue;
@@ -57,6 +59,12 @@ internal sealed class AudioSpectrum : IDisposable
         }
     }
 
+    public MusicMetricsSnapshot ReadSnapshot()
+    {
+        lock (_gate)
+            return _snapshot with { Bands = (double[])_snapshot.Bands.Clone() };
+    }
+
     private void Capture_DataAvailable(object? sender, WaveInEventArgs e)
     {
         var format = _capture.WaveFormat;
@@ -84,6 +92,7 @@ internal sealed class AudioSpectrum : IDisposable
         }
         FastFourierTransform.FFT(true, 11, fft);
         var fresh = new double[Bands.Length];
+        var analysisBands = new double[Bands.Length];
         for (var band = 0; band < Bands.Length; band++)
         {
             var low = Math.Max(1, Bands[band].Low * FftLength / format.SampleRate);
@@ -99,13 +108,17 @@ internal sealed class AudioSpectrum : IDisposable
             var rms = binCount == 0 ? 0 : Math.Sqrt(bandPower / binCount);
             var decibels = 20 * Math.Log10(Math.Max(rms, 0.000001));
             var sensitivityOffset = 20 * Math.Log10(Math.Max(Sensitivity, 0.01));
+            analysisBands[band] = Math.Clamp((decibels + 72) / 40, 0, 1);
             fresh[band] = Math.Clamp((decibels + 72 + sensitivityOffset) / 40, 0, 1);
         }
 
+        var timestampUtc = DateTimeOffset.UtcNow;
+        var snapshot = _musicMetrics.Process(analysisBands, timestampUtc);
         lock (_gate)
         {
             Array.Copy(fresh, _levels, fresh.Length);
-            _lastAudio = DateTime.UtcNow;
+            _lastAudio = timestampUtc.UtcDateTime;
+            _snapshot = snapshot;
         }
     }
 
