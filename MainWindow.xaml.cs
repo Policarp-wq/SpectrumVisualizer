@@ -29,6 +29,7 @@ public partial class MainWindow : Window
     private GlobalSystemMediaTransportControlsSession? _session;
     private readonly Forms.NotifyIcon _tray;
     private readonly VisualizerSettings _settings = VisualizerSettings.Load();
+    private readonly AvatarApiServer _avatarApi = new();
     private SettingsWindow? _settingsWindow;
     private AudioSpectrum? _spectrum;
     private readonly DispatcherTimer _meterTimer = new() { Interval = TimeSpan.FromMilliseconds(35) };
@@ -75,6 +76,7 @@ public partial class MainWindow : Window
         _positionReady = true;
         MaintainTopmost();
         RestartSpectrum();
+        _avatarApi.Start();
         _meterTimer.Start();
         _recoveryTimer.Start();
         _timeTimer.Start();
@@ -222,7 +224,9 @@ public partial class MainWindow : Window
 
     private void MeterTimer_Tick(object? sender, EventArgs e)
     {
+        var metrics = _spectrum?.ReadSnapshot() ?? MusicMetricsSnapshot.Silent;
         var levels = _spectrum?.ReadLevels() ?? new double[AudioSpectrum.BandCount];
+        _avatarApi.Publish(CreateAvatarApiState(metrics));
         if (_settings.Rainbow)
         {
             _rainbowPhase = (_rainbowPhase + 0.0025) % 1;
@@ -235,6 +239,44 @@ public partial class MainWindow : Window
             var lit = (int)Math.Ceiling(_displayLevels[i] * _segments[i].Length);
             for (var segment = 0; segment < _segments[i].Length; segment++)
                 _segments[i][segment].Visibility = segment < lit ? Visibility.Visible : Visibility.Hidden;
+        }
+    }
+
+    private AvatarApiState CreateAvatarApiState(MusicMetricsSnapshot audio)
+    {
+        if (_session is null) return new AvatarApiState(audio, null);
+
+        try
+        {
+            var playback = _session.GetPlaybackInfo();
+            var timeline = _session.GetTimelineProperties();
+            var duration = timeline.EndTime - timeline.StartTime;
+            var position = timeline.Position - timeline.StartTime;
+            var isPlaying = playback.PlaybackStatus == GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing;
+            if (isPlaying) position += DateTimeOffset.UtcNow - timeline.LastUpdatedTime;
+            if (duration > TimeSpan.Zero) position = TimeSpan.FromTicks(Math.Clamp(position.Ticks, 0, duration.Ticks));
+
+            var playbackState = playback.PlaybackStatus switch
+            {
+                GlobalSystemMediaTransportControlsSessionPlaybackStatus.Playing => "playing",
+                GlobalSystemMediaTransportControlsSessionPlaybackStatus.Paused => "paused",
+                GlobalSystemMediaTransportControlsSessionPlaybackStatus.Stopped => "stopped",
+                _ => "unknown"
+            };
+            var title = string.IsNullOrWhiteSpace(TrackTitle.Text) || TrackTitle.Text == "TrackPeek" ? null : TrackTitle.Text;
+            var artist = string.IsNullOrWhiteSpace(TrackArtist.Text) ? null : TrackArtist.Text;
+            var media = new AvatarApiMediaState(
+                playbackState,
+                title,
+                artist,
+                _session.SourceAppUserModelId,
+                duration > TimeSpan.Zero && duration < TimeSpan.FromDays(1) ? (long)position.TotalMilliseconds : null,
+                duration > TimeSpan.Zero && duration < TimeSpan.FromDays(1) ? (long)duration.TotalMilliseconds : null);
+            return new AvatarApiState(audio, media);
+        }
+        catch
+        {
+            return new AvatarApiState(audio, null);
         }
     }
 
@@ -463,7 +505,7 @@ public partial class MainWindow : Window
         DragMove();
     }
 
-    private void Window_Closed(object? sender, EventArgs e)
+    private async void Window_Closed(object? sender, EventArgs e)
     {
         SystemEvents.PowerModeChanged -= SystemEvents_PowerModeChanged;
         SystemEvents.SessionSwitch -= SystemEvents_SessionSwitch;
@@ -474,5 +516,6 @@ public partial class MainWindow : Window
         _settingsWindow?.Close();
         _tray.Visible = false;
         _tray.Dispose();
+        await _avatarApi.DisposeAsync();
     }
 }
